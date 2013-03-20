@@ -126,16 +126,9 @@ class Manager {
    */
   protected static function initializeCommands() {
     foreach (self::$packageRoots as $package_root) {
-      try {
-        $plugins = new GlobIterator("$package_root/Plugin/Command/*.inc");
-      }
-      catch (UnexpectedValueException $e) {
-      }
-      if ($plugins) {
-        while ($plugins->valid()) {
-          include_once $plugins->getPathname();
-          $plugins->next();
-        }
+      $files = self::fileScanDirectory("$package_root/Plugin/Command", '/.+\.inc$/');
+      foreach ($files as $file) {
+        include_once $file->uri;
       }
     }
   }
@@ -145,16 +138,9 @@ class Manager {
    */
   protected static function initializeComponents() {
     foreach (self::$packageRoots as $package_root) {
-      try {
-        $plugins = new GlobIterator("$package_root/Plugin/Component/*.inc");
-      }
-      catch (UnexpectedValueException $e) {
-      }
-      if ($plugins) {
-        while ($plugins->valid()) {
-          include_once $plugins->getPathname();
-          $plugins->next();
-        }
+      $files = self::fileScanDirectory("$package_root/Plugin/Component", '/.+\.inc$/');
+      foreach ($files as $file) {
+        include_once $file->uri;
       }
     }
   }
@@ -194,16 +180,10 @@ class Manager {
     }
 
     foreach (self::$packageRoots as $package_root) {
-      try {
-        $plugins = new GlobIterator("$package_root/Plugin/ConfigHome/*.inc");
-      }
-      catch (UnexpectedValueException $e) {
-      }
-
-      if ($plugins) {
-        while ($plugins->valid()) {
-          include_once $plugins->getPathname();
-          $plugins->next();
+      foreach (self::$packageRoots as $package_root) {
+        $files = self::fileScanDirectory("$package_root/Plugin/ConfigHome", '/.+\.inc$/');
+        foreach ($files as $file) {
+          include_once $file->uri;
         }
       }
     }
@@ -318,7 +298,7 @@ class Manager {
    *
    * @var string
    */
-  protected static $userHome = NULL;
+  public static $userHome = NULL;
 
   /**
    * Pattern for WebIde configuration home.
@@ -327,13 +307,13 @@ class Manager {
    *
    * @var string[]
    */
-  protected static $webIdeHomeGlobs = array(
+  protected static $webIdeHomePatterns = array(
     // Win.
-    1 => '.WebIde*',
+    1 => '@\.WebIde\d{2}@',
     // Mac.
-    2 => 'Library/Preferences/WebIde*',
+    2 => '@Library/Preferences/WebIde\d{2}@',
     // Linux.
-    3 => '.WebIde*',
+    3 => '@\.WebIde\d{2}@',
   );
 
   /**
@@ -382,18 +362,18 @@ class Manager {
    * @throws \Exception
    */
   protected static function webIdeHomes() {
-    try {
-      $webide_home = new GlobIterator(self::$userHome . '/' . self::$webIdeHomeGlobs[self::$OS]);
-    }
-    catch (UnexpectedValueException $e) {
-      throw new Exception('.WebIde not found', 1, $e);
-    }
+    $webide_homes = self::fileScanDirectory(
+      self::$userHome,
+      self::$webIdeHomePatterns[self::$OS],
+      array(
+        'types' => array('directory'),
+      )
+    );
 
-    while ($webide_home->valid()) {
+    $return = array();
+    foreach ($webide_homes as $webide_home) {
       if (
-        $webide_home->isDir()
-        &&
-        ($version = self::getWebIdeVersionFromPath($webide_home->getPathname()))
+        ($version = self::getWebIdeVersionFromPath($webide_home->name))
         &&
         (
           $version >= self::$webIdeVersionMin
@@ -401,10 +381,8 @@ class Manager {
           (!self::$webIdeVersionMax || $version <= self::$webIdeVersionMax)
         )
       ) {
-        $return[] = $webide_home->getPathname();
+        $return[] = $webide_home->name;
       }
-
-      $webide_home->next();
     }
     sort($return);
 
@@ -516,6 +494,91 @@ class Manager {
     $class_name = $config_home_info->className;
 
     return $class_name::factory($config_home_info);
+  }
+
+  /**
+   * Finds all files that match a given mask in a given directory.
+   *
+   * Directories and files beginning with a period are excluded; this prevents
+   * hidden files and directories (such as SVN working directories) from being
+   * scanned.
+   *
+   * @param string $dir
+   *   The base directory or URI to scan, without trailing slash.
+   * @param string $mask
+   *   The preg_match() regular expression of the files to find.
+   * @param array $options
+   *   An associative array of additional options, with the following elements:
+   *   - 'nomask': The preg_match() regular expression of the files to ignore.
+   *     Defaults to '/(\.\.?|CVS)$/'.
+   *   - 'callback': The callback function to call for each match. There is no
+   *     default callback.
+   *   - 'recurse': When TRUE, the directory scan will recurse the entire tree
+   *     starting at the provided directory. Defaults to TRUE.
+   *   - 'key': The key to be used for the returned associative array of files.
+   *     Possible values are 'uri', for the file's URI; 'filename', for the
+   *     basename of the file; and 'name' for the name of the file without the
+   *     extension. Defaults to 'uri'.
+   *   - 'min_depth': Minimum depth of directories to return files from.
+   *     Defaults to 0.
+   * @param int $depth
+   *   Current depth of recursion. This parameter is only used internally and
+   *   should not be passed in.
+   *
+   * @return array
+   *   An associative array (keyed on the chosen key) of objects with 'uri',
+   *   'filename', and 'name' members corresponding to the matching files.
+   */
+  public static function fileScanDirectory($dir, $mask, $options = array(), $depth = 0) {
+    // Merge in defaults.
+    $options += array(
+      'nomask' => '/(\.\.?|CVS)$/',
+      'recurse' => FALSE,
+      'key' => 'uri',
+      'min_depth' => 0,
+      'exclude_dots' => TRUE,
+      'types' => array('directory', 'file'),
+    );
+
+    $options['key'] = in_array($options['key'], array('uri', 'filename', 'name')) ? $options['key'] : 'uri';
+    $files = array();
+    $key = $options['key'];
+    if (is_dir($dir) && $handle = opendir($dir)) {
+      while (FALSE !== ($filename = readdir($handle))) {
+        $dot = ($filename == '.' || $filename == '..');
+        if (
+          preg_match($options['nomask'], $filename)
+          || ($options['exclude_dots'] && $dot)
+        ) {
+          continue;
+        }
+        $uri = "$dir/$filename";
+        $type = is_dir($uri) ? 'directory' : 'file';
+
+        // Give priority to files in this folder by merging them in after
+        // any subdirectory files.
+        $file = new \stdClass();
+        $file->type = $type;
+        $file->uri = realpath($uri);
+        $file->filename = $filename;
+        $file->name = ($file->type == 'file') ? pathinfo($filename, PATHINFO_FILENAME) : $filename;
+
+        if ($depth >= $options['min_depth']
+          && preg_match($mask, $filename)
+          && in_array($file->type, $options['types'])
+        ) {
+          $files[$file->$key] = $file;
+        }
+
+        if ($type == 'directory' && !$dot && $options['recurse']) {
+          $files = array_merge(self::fileScanDirectory($file->uri, $mask, $options, $depth + 1), $files);
+        }
+      }
+
+      closedir($handle);
+    }
+
+    return $files;
   }
 
   /**

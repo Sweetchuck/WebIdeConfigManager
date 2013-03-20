@@ -60,7 +60,7 @@ abstract class PluginComponentBase implements PluginComponentInterface {
   /**
    * @var string
    */
-  protected $glob = '*.*';
+  protected $pattern = '/\.inc$/';
 
   /**
    * Get the info definition.
@@ -102,14 +102,13 @@ abstract class PluginComponentBase implements PluginComponentInterface {
     $return = array();
 
     $config_home_path = $this->configHome->getInfo()->path;
-    $files = new \GlobIterator("{$config_home_path}/{$this->info->directory}/{$this->glob}");
-    while ($files->valid()) {
+    $files = Manager::fileScanDirectory("{$config_home_path}/{$this->info->directory}", $this->pattern);
+    foreach ($files as $file) {
       $config_file = new ConfigFile();
-      $config_file->relativePath = $this->relativePath($files->getPathname());
-      $config_file->fullPathConfigHome = $files->getPathname();
-      $config_file->fullPathWebIde = Manager::$webIdeHomeConfig . '/' . $config_file->relativePath;
+      $config_file->relativePath = $this->relativePath($file->uri);
+      $config_file->fullPathConfigHome = $file->uri;
+      $config_file->fullPathWebIde = Manager::$userHome . '/' . Manager::$webIdeHomeConfig . '/' . $config_file->relativePath;
       $return[$config_file->relativePath] = $config_file;
-      $files->next();
     }
 
     return $return;
