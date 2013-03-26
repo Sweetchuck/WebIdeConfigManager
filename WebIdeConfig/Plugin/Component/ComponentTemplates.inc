@@ -18,4 +18,11 @@ $info->description = 'LiveTemplates.';
 $info->directory = 'templates';
 Manager::$pluginComponentsInfo[$info->id] = $info;
 
-class ComponentTemplates extends PluginComponentBase {}
+class ComponentTemplates extends PluginComponentBase {
+
+  /**
+   * @var string
+   */
+  protected $pattern = '/\.xml$/';
+
+}

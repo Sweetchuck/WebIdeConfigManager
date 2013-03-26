@@ -18,4 +18,11 @@ $info->description = 'File type information.';
 $info->directory = 'filetypes';
 Manager::$pluginComponentsInfo[$info->id] = $info;
 
-class ComponentFileTypes extends PluginComponentBase {}
+class ComponentFileTypes extends PluginComponentBase {
+
+  /**
+   * @var string
+   */
+  protected $pattern = '/\.xml$/';
+
+}
