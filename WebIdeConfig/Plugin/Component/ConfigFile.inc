@@ -114,7 +114,7 @@ class ConfigFile {
       throw new \Exception();
     }
 
-    if ($this->identical()) {
+    if ($this->identical() || !$this->existsInWebIde()) {
       return self::COPY_SKIP;
     }
 

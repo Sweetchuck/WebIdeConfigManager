@@ -364,7 +364,7 @@ class Manager {
   protected static function webIdeHomes() {
     $config_path = self::$userHome;
     // If self::OS_MAC we need to search in the Library Preferences folder.
-    if (self::OS_MAC) {
+    if (self::$OS == self::OS_MAC) {
       $config_path .= '/Library/Preferences';
     }
     $webide_homes = self::fileScanDirectory(
@@ -386,7 +386,12 @@ class Manager {
           (!self::$webIdeVersionMax || $version <= self::$webIdeVersionMax)
         )
       ) {
-        $return[] = $webide_home->name;
+        if (self::$OS == self::OS_MAC) {
+          $return[] = 'Library/Preferences/' . $webide_home->name;
+        }
+        else {
+          $return[] = $webide_home->name;
+        }
       }
     }
     sort($return);
