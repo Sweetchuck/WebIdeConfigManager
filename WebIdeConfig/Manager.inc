@@ -311,7 +311,7 @@ class Manager {
     // Win.
     1 => '@\.WebIde\d{2}@',
     // Mac.
-    2 => '@Library/Preferences/WebIde\d{2}@',
+    2 => '@WebIde\d{2}@',
     // Linux.
     3 => '@\.WebIde\d{2}@',
   );
@@ -362,8 +362,13 @@ class Manager {
    * @throws \Exception
    */
   protected static function webIdeHomes() {
+    $config_path = self::$userHome;
+    // If self::OS_MAC we need to search in the Library Preferences folder.
+    if (self::OS_MAC) {
+      $config_path .= '/Library/Preferences';
+    }
     $webide_homes = self::fileScanDirectory(
-      self::$userHome,
+      $config_path,
       self::$webIdeHomePatterns[self::$OS],
       array(
         'types' => array('directory'),
