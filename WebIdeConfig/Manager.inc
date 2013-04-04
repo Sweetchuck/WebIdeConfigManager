@@ -311,7 +311,7 @@ class Manager {
     // Win.
     1 => '@\.WebIde\d{2}@',
     // Mac.
-    2 => '@Library/Preferences/WebIde\d{2}@',
+    2 => '@WebIde\d{2}@',
     // Linux.
     3 => '@\.WebIde\d{2}@',
   );
@@ -363,7 +363,7 @@ class Manager {
    */
   protected static function webIdeHomes() {
     $webide_homes = self::fileScanDirectory(
-      self::$userHome,
+      self::$userHome . '/Library/Preferences/',
       self::$webIdeHomePatterns[self::$OS],
       array(
         'types' => array('directory'),
