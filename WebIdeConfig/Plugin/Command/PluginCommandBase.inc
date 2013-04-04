@@ -53,8 +53,4 @@ abstract class PluginCommandBase implements PluginCommandInterface {
    */
   abstract protected function initializeArguments(array $args);
 
-  /**
-   * Run the command.
-   */
-  abstract public function execute();
 }
