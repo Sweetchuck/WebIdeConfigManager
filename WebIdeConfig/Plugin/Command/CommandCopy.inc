@@ -142,16 +142,11 @@ abstract class CommandCopy extends PluginCommandBase {
       fwrite(Manager::$stdout, "\n" . $config_home_info->label . "\n");
       foreach ($this->componentIds as $component_id) {
         switch ($component_id) {
+          case 'colors':
           case 'fileTemplates':
-            $this->executeFileTemplates($config_home);
-            break;
-
           case 'filetypes':
-            $this->executeFileTypes($config_home);
-            break;
-
           case 'templates':
-            $this->executeLiveTemplates($config_home);
+            $this->executeComponent($config_home, $component_id);
             break;
 
         }
@@ -164,35 +159,16 @@ abstract class CommandCopy extends PluginCommandBase {
    *
    * @param PluginConfigHomeInterface $config_home
    *   Affected ConfigHome.
+   * @param string $component_id
+   *   Component identifier.
    */
-  protected function executeFileTemplates(PluginConfigHomeInterface $config_home) {
-    $component = Manager::getPluginComponentInstance($config_home->getInfo()->id, 'fileTemplates');
-    fwrite(Manager::$stdout, Manager::$indent . $component->getInfo()->label . "\n");
-    $this->copyFiles($component->getFiles(), $this->info->destination);
-  }
-
-  /**
-   * Process the filetypes.
-   *
-   * @param PluginConfigHomeInterface $config_home
-   *   Affected ConfigHome.
-   */
-  protected function executeFileTypes(PluginConfigHomeInterface $config_home) {
-    $component = Manager::getPluginComponentInstance($config_home->getInfo()->id, 'filetypes');
-    fwrite(Manager::$stdout, Manager::$indent . $component->getInfo()->label . "\n");
-    $this->copyFiles($component->getFiles(), $this->info->destination);
-  }
-
-  /**
-   * Process the templates.
-   *
-   * @param PluginConfigHomeInterface $config_home
-   *   Affected ConfigHome.
-   */
-  protected function executeLiveTemplates(PluginConfigHomeInterface $config_home) {
-    $component = Manager::getPluginComponentInstance($config_home->getInfo()->id, 'templates');
-    fwrite(Manager::$stdout, Manager::$indent . $component->getInfo()->label . "\n");
-    $this->copyFiles($component->getFiles(), $this->info->destination);
+  protected function executeComponent(PluginConfigHomeInterface $config_home, $component_id) {
+    $component = Manager::getPluginComponentInstance($config_home->getInfo()->id, $component_id);
+    $config_files = $component->getFiles();
+    if ($config_files) {
+      fwrite(Manager::$stdout, Manager::$indent . $component->getInfo()->label . "\n");
+      $this->copyFiles($config_files, $this->info->destination);
+    }
   }
 
   /**
