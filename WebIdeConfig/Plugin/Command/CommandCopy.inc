@@ -138,6 +138,8 @@ abstract class CommandCopy extends PluginCommandBase {
     fwrite(Manager::$stdout, 'WebIde configuration directory is ' . Manager::$webIdeHome . "\n");
     foreach ($this->configHomeIds as $config_home_id) {
       $config_home = Manager::getPluginConfigHomeInstance($config_home_id);
+      $config_home_info = $config_home->getInfo();
+      fwrite(Manager::$stdout, "\n" . $config_home_info->label . "\n");
       foreach ($this->componentIds as $component_id) {
         switch ($component_id) {
           case 'fileTemplates':
