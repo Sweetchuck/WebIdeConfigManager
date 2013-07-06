@@ -63,6 +63,13 @@ abstract class PluginComponentBase implements PluginComponentInterface {
   protected $pattern = '/\.inc$/';
 
   /**
+   * @see Manager::fileScanDirectory()
+   *
+   * @var array
+   */
+  protected $fileScanOptions = array();
+
+  /**
    * Get the info definition.
    *
    * @return PluginComponentInfo
@@ -102,7 +109,7 @@ abstract class PluginComponentBase implements PluginComponentInterface {
     $return = array();
 
     $config_home_path = $this->configHome->getInfo()->path;
-    $files = Manager::fileScanDirectory("{$config_home_path}/{$this->info->directory}", $this->pattern);
+    $files = Manager::fileScanDirectory("{$config_home_path}/{$this->info->directory}", $this->pattern, $this->fileScanOptions);
     foreach ($files as $file) {
       $config_file = new ConfigFile();
       $config_file->relativePath = $this->relativePath($file->uri);

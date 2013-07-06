@@ -18,4 +18,6 @@ $info->description = 'File templates.';
 $info->directory = 'fileTemplates';
 Manager::$pluginComponentsInfo[$info->id] = $info;
 
-class ComponentFileTemplates extends PluginComponentBase {}
+class ComponentFileTemplates extends PluginComponentBase {
+  protected $fileScanOptions = array('recurse' => TRUE);
+}
