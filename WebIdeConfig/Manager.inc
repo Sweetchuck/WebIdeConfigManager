@@ -284,7 +284,7 @@ class Manager {
    *
    * @var integer
    */
-  protected static $webIdeVersionMax = '60';
+  protected static $webIdeVersionMax = '70';
 
   /**
    * Commandline exit code.
