@@ -20,4 +20,9 @@ Manager::$pluginComponentsInfo[$info->id] = $info;
 
 class ComponentFileTemplates extends PluginComponentBase {
   protected $fileScanOptions = array('recurse' => TRUE);
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $pattern = '/.*/';
 }
