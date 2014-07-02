@@ -3,14 +3,8 @@
 namespace WebIdeConfig;
 
 use UnexpectedValueException;
-use WebIdeConfig\Plugin\Command\PluginCommandInterface;
-use WebIdeConfig\Plugin\Command\PluginCommandInfo;
 use WebIdeConfig\Plugin\Component\PluginComponentInterface;
-use WebIdeConfig\Plugin\Component\PluginComponentInfo;
-use WebIdeConfig\Plugin\ConfigHome\PluginConfigHomeInterface;
 use WebIdeConfig\Plugin\ConfigHome\PluginConfigHomeInfo;
-
-use GlobIterator;
 use Exception;
 
 class Manager {
@@ -152,10 +146,11 @@ class Manager {
    * Initialize ConfigHome plugins.
    */
   protected static function initializeConfigHomes() {
+    $config_homes = NULL;
     try {
       $config_homes = new \DirectoryIterator(self::$selfHome . '/../ConfigHome');
     }
-    catch (UnexpectedValueException  $e) {
+    catch (UnexpectedValueException $e) {
     }
 
     if ($config_homes) {
@@ -183,11 +178,9 @@ class Manager {
     }
 
     foreach (self::$packageRoots as $package_root) {
-      foreach (self::$packageRoots as $package_root) {
-        $files = self::fileScanDirectory("$package_root/Plugin/ConfigHome", '/.+\.inc$/');
-        foreach ($files as $file) {
-          include_once $file->uri;
-        }
+      $files = self::fileScanDirectory("$package_root/Plugin/ConfigHome", '/.+\.inc$/');
+      foreach ($files as $file) {
+        include_once $file->uri;
       }
     }
   }
