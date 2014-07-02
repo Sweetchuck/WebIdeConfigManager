@@ -85,7 +85,12 @@ class Manager {
   public static function initialize($args) {
     self::$stdout = fopen('php://stdout', 'w');
     self::$stderr = fopen('php://stderr', 'w');
-    self::$userHome = $_SERVER['HOME'];
+    if (isset($_SERVER['HOME'])) {
+      self::$userHome = $_SERVER['HOME'];
+    }
+    elseif (isset($_SERVER['USERPROFILE'])) {
+      self::$userHome = $_SERVER['USERPROFILE'];
+    }
     self::initializeOS();
     self::initializeSelfHome();
     self::$packageRoots[] = self::$selfHome;
@@ -105,15 +110,13 @@ class Manager {
 
   /**
    * Determine the operating system.
-   *
-   * @return int
-   *   One of the self::OS_*.
    */
   protected static function initializeOS() {
-    if (strpos(PHP_OS, 'Win') !== FALSE) {
+    $php_os_lower = strtolower(PHP_OS);
+    if (strpos($php_os_lower, 'win') !== FALSE) {
       self::$OS = self::OS_WINDOWS;
     }
-    elseif (strpos(PHP_OS, 'Linux') !== FALSE) {
+    elseif (strpos($php_os_lower, 'linux') !== FALSE) {
       self::$OS = self::OS_LINUX;
     }
     else {
