@@ -10,7 +10,7 @@ Sample
 
 Exit from PhpStorm
 
-run 'php ./WebIdeConfigManager.php' to import all configs.
-run 'php ./WebIdeConfigManager.php -h __MyPlayGround__' to import just __MyPlayGround__ config.
+run `php ./WebIdeConfigManager.php` to import all configs.
+run `php ./WebIdeConfigManager.php -h MyPlayGround` to import just __MyPlayGround__ config.
 
 Start PhpStorm
