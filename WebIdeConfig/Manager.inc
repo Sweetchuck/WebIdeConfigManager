@@ -107,11 +107,11 @@ class Manager {
    */
   protected static function initializeOS() {
     $php_os_lower = strtolower(PHP_OS);
-    if (strpos($php_os_lower, 'win') !== FALSE) {
-      self::$OS = self::OS_WINDOWS;
-    }
-    elseif (strpos($php_os_lower, 'linux') !== FALSE) {
+    if (strpos($php_os_lower, 'linux') !== FALSE) {
       self::$OS = self::OS_LINUX;
+    }
+    elseif (strpos($php_os_lower, 'win') === 0) {
+      self::$OS = self::OS_WINDOWS;
     }
     else {
       self::$OS = self::OS_MAC;
