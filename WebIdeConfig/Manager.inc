@@ -273,14 +273,14 @@ class Manager {
    *
    * @var integer
    */
-  protected static $webIdeVersionMin = '40';
+  protected static $webIdeVersionMin = 40;
 
   /**
    * Maximum major version of the PhpStorm.
    *
    * @var integer
    */
-  protected static $webIdeVersionMax = '90';
+  protected static $webIdeVersionMax = 100;
 
   /**
    * Commandline exit code.
@@ -305,11 +305,11 @@ class Manager {
    */
   protected static $webIdeHomePatterns = array(
     // Win.
-    1 => '@\.WebIde\d{2}@',
+    1 => '@\.WebIde\d{2,3}@',
     // Mac.
-    2 => '@WebIde\d{2}@',
+    2 => '@WebIde\d{2,3}@',
     // Linux.
-    3 => '@\.WebIde\d{2}@',
+    3 => '@\.WebIde\d{2,3}@',
   );
 
   /**
@@ -330,7 +330,7 @@ class Manager {
   }
 
   /**
-   * Set the target .WebIde## directory.
+   * Set the target .WebIde### directory.
    *
    * @throws \Exception
    */
@@ -338,7 +338,7 @@ class Manager {
     self::$webIdeHome = self::$userHome;
     $webide_homes = self::webIdeHomes();
     if (!$webide_homes) {
-      throw new Exception('.WebIde## not found');
+      throw new Exception('.WebIde### not found');
     }
     // Get the latest.
     self::$webIdeHome = array_pop($webide_homes);
@@ -401,13 +401,13 @@ class Manager {
    * @param string $path
    *   String with trailing decimal characters.
    *
-   * @return string
+   * @return int
    *   Version number.
    */
   protected static function getWebIdeVersionFromPath($path) {
     $matches = NULL;
 
-    return (preg_match('/\d+$/', $path, $matches)) ? $matches[0] : 0;
+    return (preg_match('/\d+$/', $path, $matches)) ? (int) $matches[0] : 0;
   }
 
   /**
