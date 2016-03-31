@@ -280,7 +280,7 @@ class Manager {
    *
    * @var integer
    */
-  protected static $webIdeVersionMax = 100;
+  protected static $webIdeVersionMax = FALSE;
 
   /**
    * Commandline exit code.
@@ -305,11 +305,11 @@ class Manager {
    */
   protected static $webIdeHomePatterns = array(
     // Win.
-    1 => '@\.WebIde\d{2,3}@',
+    1 => '@\.WebIde\d{2,3}|.PhpStorm\d{4}\.\d{1,3}@',
     // Mac.
-    2 => '@WebIde\d{2,3}@',
+    2 => '@WebIde\d{2,3}|PhpStorm\d{4}\.\d{1,3}@',
     // Linux.
-    3 => '@\.WebIde\d{2,3}@',
+    3 => '@\.WebIde\d{2,3}|.PhpStorm\d{4}\.\d{1,3}@',
   );
 
   /**
@@ -373,6 +373,7 @@ class Manager {
 
     $return = array();
     foreach ($webide_homes as $webide_home) {
+      echo $webide_home->name;
       if (
         ($version = self::getWebIdeVersionFromPath($webide_home->name))
         &&
@@ -389,6 +390,8 @@ class Manager {
           $return[] = $webide_home->name;
         }
       }
+
+      echo $version;
     }
     sort($return);
 
@@ -407,7 +410,7 @@ class Manager {
   protected static function getWebIdeVersionFromPath($path) {
     $matches = NULL;
 
-    return (preg_match('/\d+$/', $path, $matches)) ? (int) $matches[0] : 0;
+    return (preg_match('/\d+/', $path, $matches)) ? (int) $matches[0] : 0;
   }
 
   /**
