@@ -350,7 +350,9 @@ class Manager {
   }
 
   /**
-   * Find all WebIde## directory in user's home.
+   * Find all PhpStorm configuration directories in user's home.
+   *
+   * Needs to consider WebIde## (old) and PhpStorm####.# (new) formats.
    *
    * @return string[]
    *   Directories.
@@ -373,7 +375,6 @@ class Manager {
 
     $return = array();
     foreach ($webide_homes as $webide_home) {
-      echo $webide_home->name;
       if (
         ($version = self::getWebIdeVersionFromPath($webide_home->name))
         &&
@@ -390,8 +391,6 @@ class Manager {
           $return[] = $webide_home->name;
         }
       }
-
-      echo $version;
     }
     usort($return, array(__CLASS__, 'compareWebIdeHomes'));
 
