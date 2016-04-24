@@ -393,9 +393,29 @@ class Manager {
 
       echo $version;
     }
-    sort($return);
+    usort($return, array(__CLASS__, 'compareWebIdeHomes'));
 
     return $return;
+  }
+
+  /**
+   * @param string $a
+   * @param string $b
+   *
+   * @return int
+   */
+  protected static function compareWebIdeHomes($a, $b) {
+    $a = ltrim($a, '.');
+    $b = ltrim($b, '.');
+    if (strpos($a, 'WebIde') === 0 && strpos($b, 'WebIde') === FALSE) {
+      return -1;
+    }
+
+    if (strpos($b, 'WebIde') === 0 && strpos($a, 'WebIde') === FALSE) {
+      return 1;
+    }
+
+    return version_compare($a, $b);
   }
 
   /**
