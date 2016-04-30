@@ -280,7 +280,7 @@ class Manager {
    *
    * @var integer
    */
-  protected static $webIdeVersionMax = 100;
+  protected static $webIdeVersionMax = FALSE;
 
   /**
    * Commandline exit code.
@@ -305,11 +305,11 @@ class Manager {
    */
   protected static $webIdeHomePatterns = array(
     // Win.
-    1 => '@\.WebIde\d{2,3}@',
+    1 => '@\.WebIde\d{2,3}|.PhpStorm\d{4}\.\d{1,3}@',
     // Mac.
-    2 => '@WebIde\d{2,3}@',
+    2 => '@WebIde\d{2,3}|PhpStorm\d{4}\.\d{1,3}@',
     // Linux.
-    3 => '@\.WebIde\d{2,3}@',
+    3 => '@\.WebIde\d{2,3}|.PhpStorm\d{4}\.\d{1,3}@',
   );
 
   /**
@@ -350,7 +350,9 @@ class Manager {
   }
 
   /**
-   * Find all WebIde## directory in user's home.
+   * Find all PhpStorm configuration directories in user's home.
+   *
+   * Needs to consider WebIde## (old) and PhpStorm####.# (new) formats.
    *
    * @return string[]
    *   Directories.
@@ -390,9 +392,29 @@ class Manager {
         }
       }
     }
-    sort($return);
+    usort($return, array(__CLASS__, 'compareWebIdeHomes'));
 
     return $return;
+  }
+
+  /**
+   * @param string $a
+   * @param string $b
+   *
+   * @return int
+   */
+  protected static function compareWebIdeHomes($a, $b) {
+    $a = ltrim($a, '.');
+    $b = ltrim($b, '.');
+    if (strpos($a, 'WebIde') === 0 && strpos($b, 'WebIde') === FALSE) {
+      return -1;
+    }
+
+    if (strpos($b, 'WebIde') === 0 && strpos($a, 'WebIde') === FALSE) {
+      return 1;
+    }
+
+    return version_compare($a, $b);
   }
 
   /**
@@ -407,7 +429,7 @@ class Manager {
   protected static function getWebIdeVersionFromPath($path) {
     $matches = NULL;
 
-    return (preg_match('/\d+$/', $path, $matches)) ? (int) $matches[0] : 0;
+    return (preg_match('/\d+/', $path, $matches)) ? (int) $matches[0] : 0;
   }
 
   /**
