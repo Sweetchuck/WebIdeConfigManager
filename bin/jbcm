@@ -1,0 +1,115 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types = 1);
+
+use Consolidation\Config\Config;
+use Consolidation\Config\Util\ConfigOverlay;
+use Consolidation\Config\Util\EnvConfig;
+use League\Container\Container;
+use Robo\Robo;
+use Robo\Runner as RoboRunner;
+use Sweetchuck\WebIdeConfigManager\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
+
+/**
+ * @phpstan-param array<string, string> $envVars
+ */
+function autoloadPathSuggestions(
+    string $projectRoot,
+    bool $isPhar,
+    array $envVars,
+): \Generator {
+    // https://getcomposer.org/doc/articles/vendor-binaries.md#finding-the-composer-autoloader-from-a-binary
+    if (isset($GLOBALS['_composer_autoload_path'])) {
+        yield $GLOBALS['_composer_autoload_path'];
+    }
+
+    $vendorDir = 'vendor';
+
+    yield "$projectRoot/$vendorDir/autoload.php";
+
+    $composerFileName = 'composer.json';
+    if (!$isPhar && isset($envVars['COMPOSER'])) {
+        $composerFileName = $envVars['COMPOSER'];
+    }
+
+    if (file_exists("$projectRoot/$composerFileName")) {
+        $composer = json_decode(file_get_contents("$projectRoot/$composerFileName") ?: '{}', true);
+        if (isset($composer['config']['vendor-dir'])) {
+            $vendorDir = $composer['config']['vendor-dir'];
+        }
+    }
+
+    yield "$projectRoot/$vendorDir/autoload.php";
+    yield __DIR__ . '/../../../autoload.php';
+}
+
+$isPhar = extension_loaded('Phar') && \Phar::running();
+$projectRoot = $isPhar ? \Phar::running() : dirname(__DIR__);
+
+$envVars = getenv();
+ksort($envVars);
+
+$classLoader = null;
+foreach (autoloadPathSuggestions($projectRoot, $isPhar, $envVars) as $autoloadPath) {
+    if (!file_exists($autoloadPath)) {
+        continue;
+    }
+
+    $classLoader = require_once $autoloadPath;
+    break;
+}
+
+$argv = $_SERVER['argv'];
+
+// region init application
+$appName = Application::NAME;
+$appVersion = '2.x-dev';
+$app = new Application($appName, $appVersion);
+$app->setAutoExit(false);
+//endregion
+
+$selfUpdateRepository = 'Sweetchuck/WebIdeConfigManager';
+$envVarNamePrefix = mb_strtoupper($appName);
+
+$input = new ArgvInput($argv);
+$output = new ConsoleOutput(
+    // @todo These settings should be based on the input -v and --ansi.
+    OutputInterface::VERBOSITY_NORMAL,
+    true,
+);
+
+// region init config
+$configFiles = $app->getConfigFiles($projectRoot, $envVars);
+$config = Robo::createConfiguration($configFiles);
+if ($config instanceof ConfigOverlay) {
+    $config->addContext('env', new EnvConfig($app->getName()));
+    $config->addContext('envVars', new Config(['env' => $envVars]));
+}
+// endregion
+
+$container = new Container();
+Robo::configureContainer($container, $app, $config, $input, $output, $classLoader);
+$app->setConfig($config);
+$app->setContainer($container);
+$app->configureContainer();
+
+// @phpstan-ignore-next-line
+$runner = new RoboRunner($app->getCommandClasses($projectRoot));
+$runner
+    ->setOutput($output)
+    ->setContainer($container);
+$runner
+    ->setSelfUpdateRepository($selfUpdateRepository)
+    ->setEnvConfigPrefix($envVarNamePrefix)
+    ->setClassLoader($classLoader);
+
+Robo::finalizeContainer($container);
+$runner->installRoboHandlers();
+
+$statusCode = $runner->execute($argv, $appName, $appVersion, $output);
+
+exit($statusCode);

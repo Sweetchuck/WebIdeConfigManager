@@ -1,0 +1,493 @@
+version: 2.1
+
+orbs:
+    codecov: 'codecov/codecov@4.0.1'
+
+.env_common: &env_common
+    SHELL: '/bin/bash'
+    APP_NAME: 'jbcm'
+
+.env_composer: &env_composer
+    COMPOSER_NO_INTERACTION: '1'
+    COMPOSER_MEMORY_LIMIT: '-1'
+    COMPOSER_CACHE_DIR: '/home/circleci/.cache/composer'
+
+executors:
+    php_min:
+        resource_class: 'small'
+        environment:
+            <<: *env_common
+            <<: *env_composer
+        docker:
+            -
+                name: 'main'
+                image: 'cimg/php:8.4'
+    php_plus1:
+        resource_class: 'small'
+        environment:
+            <<: *env_common
+            <<: *env_composer
+        docker:
+            -
+                name: 'main'
+                image: 'cimg/php:8.5'
+
+commands:
+    php_extension_pecl_install:
+        description: 'Install PHP extension with pecl'
+        parameters:
+            ext_name:
+                type: 'string'
+            is_zend:
+                type: 'string'
+                default: 'false'
+            package_names:
+                type: 'string'
+                default: ''
+        steps:
+            -
+                run:
+                    name: 'Install PHP extension with pecl – <<parameters.ext_name>>'
+                    command: |
+                        if php -m | grep '<<parameters.ext_name>>' ; then
+                            echo 1>&2 'PHP extension <<parameters.ext_name>> is already enabled. No need to install'
+
+                            exit 0
+                        fi
+
+                        if compgen -G '/usr/local/lib/php/extensions/*/<<parameters.ext_name>>.so' 1>/dev/null ; then
+                            echo 1>&2 'PHP extension <<parameters.ext_name>> is already installed.'
+
+                            exit 0
+                        fi
+
+                        if [[ '<<parameters.package_names>>' != '' ]] ; then
+                            sudo apt-get update
+                            sudo apt-get install -y <<parameters.package_names>>
+                        fi
+
+                        sudo pecl install '<<parameters.ext_name>>'
+            -
+                php_extension_enable:
+                    ext_name: '<<parameters.ext_name>>'
+                    is_zend: '<<parameters.is_zend>>'
+
+    php_extension_bundled_install:
+        parameters:
+            ext_name:
+                type: 'string'
+            is_zend:
+                type: 'string'
+                default: 'false'
+            package_names:
+                type: 'string'
+                default: ''
+        steps:
+            -
+                run:
+                    name: 'Compile bundled PHP extension – <<parameters.ext_name>>'
+                    command: |
+                        if php -m | grep '<<parameters.ext_name>>' ; then
+                            echo 1>&2 'PHP extension <<parameters.ext_name>> is already enabled. No need to install'
+
+                            exit 0
+                        fi
+
+                        if compgen -G '/usr/local/lib/php/extensions/*/<<parameters.ext_name>>.so' 1>/dev/null ; then
+                            echo 1>&2 'PHP extension <<parameters.ext_name>> is already installed.'
+
+                            exit 0
+                        fi
+
+                        if [[ '<<parameters.package_names>>' != '' ]] ; then
+                            sudo apt-get update
+                            sudo apt-get install -y <<parameters.package_names>>
+                        fi
+
+                        if command -v docker-php-ext-install ; then
+                            sudo docker-php-ext-install '<<parameters.ext_name>>'
+
+                            exit $?
+                        fi
+
+                        srcRoot='/usr/local/src'
+                        phpVersion="$(php -r 'echo \PHP_VERSION;')"
+                        phpSrcDir="${srcRoot}/php-${phpVersion}"
+
+                        if [[ ! -d "${phpSrcDir}" ]] ; then
+                            wget "https://www.php.net/distributions/php-${phpVersion}.tar.gz"
+                            sudo tar xvzf "php-${phpVersion}.tar.gz" -C "${srcRoot}"
+                            rm "php-${phpVersion}.tar.gz"
+                        fi
+
+                        cd "${srcRoot}/php-${phpVersion}/ext/<<parameters.ext_name>>"
+                        sudo phpize
+                        sudo ./configure
+                        sudo make -j
+                        sudo make install
+            -
+                php_extension_enable:
+                    ext_name: '<<parameters.ext_name>>'
+                    is_zend: '<<parameters.is_zend>>'
+
+    php_extension_enable:
+        parameters:
+            ext_name:
+                type: 'string'
+            is_zend:
+                type: 'string'
+                default: 'false'
+        steps:
+            -
+                run:
+                    name: 'Enable PHP extension – <<parameters.ext_name>>'
+                    command: |
+                        if php -m | grep '<<parameters.ext_name>>' ; then
+                            exit 0
+                        fi
+
+                        scanDir="$(php -i | grep --color=never --only-matching --perl-regexp '(?<=^Scan this dir for additional \.ini files => ).+')"
+
+                        if [[ '<<parameters.is_zend>>' = 'true' ]] ; then
+                            content='zend_extension=<<parameters.ext_name>>'
+                        else
+                            content='extension=<<parameters.ext_name>>'
+                        fi
+
+                        echo "${content}" | sudo tee --append "${scanDir}/<<parameters.ext_name>>.ini"
+
+    php_extension_install_pcov:
+        description: 'Install PHP extension – pcov'
+        steps:
+            -
+                php_extension_pecl_install:
+                    ext_name: 'pcov'
+
+    php_extension_install_bz2:
+        description: 'Install PHP extension – bz2'
+        steps:
+            -
+                php_extension_bundled_install:
+                    ext_name: 'bz2'
+                    package_names: 'libbz2-dev'
+
+    php_extension_install_tidy:
+        description: 'Install PHP extension – tidy'
+        steps:
+            -
+                php_extension_bundled_install:
+                    ext_name: 'tidy'
+                    package_names: 'libtidy-dev'
+
+    php_extension_install:
+        description: 'Install required PHP extensions'
+        steps:
+            -
+                restore_cache:
+                    name: 'Install required PHP extensions - cache restore'
+                    keys:
+                        - 'php-extensions-{{ checksum "/usr/local/bin/php" }}-5'
+            -
+                run:
+                    name: 'Install required PHP extensions – copy to final location'
+                    command: |
+                        extDir="$(php -i | grep --color=never --only-matching --perl-regexp '(?<=^extension_dir => ).+' | sed 's/ => .*//g')"
+                        sudo mkdir -p "${extDir}"
+                        for extName in bz2 pcov tidy ; do
+                            if [[ -s ~/.cache/php/ext/${extName}.so ]] ; then
+                                sudo cp ~/.cache/php/ext/${extName}.so "${extDir}/${extName}.so"
+                            fi
+                        done
+            -
+                php_extension_install_bz2: {}
+            -
+                php_extension_install_pcov: {}
+            -
+                php_extension_install_tidy: {}
+            -
+                run:
+                    name: 'Install required PHP extensions – copy to cache location'
+                    command: |
+                        mkdir -p ~/.cache/php/ext
+                        extDir="$(php -i | grep --color=never --only-matching --perl-regexp '(?<=^extension_dir => ).+' | sed 's/ => .*//g')"
+                        for extName in bz2 pcov ; do
+                            if [[ -s "${extDir}/${extName}.so" ]] ; then
+                                cp "${extDir}/${extName}.so" ~/.cache/php/ext/${extName}.so
+                            fi
+                        done
+            -
+                save_cache:
+                    name: 'PHP extensions - cache save'
+                    key: 'php-extensions-{{ checksum "/usr/local/bin/php" }}-5'
+                    paths:
+                        - '~/.cache/php/ext/'
+
+    composer_install:
+        description: 'Install Composer dependencies with cache restore and save'
+        parameters:
+            arguments:
+                type: 'string'
+                default: ''
+        steps:
+            -
+                restore_cache:
+                    name: 'Composer install – cache restore'
+                    keys:
+                        - 'composer-{{ checksum "./composer.lock" }}-2'
+            -
+                run:
+                    name: 'Composer install – do it'
+                    command: >
+                        composer install --no-progress <<parameters.arguments>>
+            -
+                save_cache:
+                    name: 'Composer install – cache save'
+                    key: 'composer-{{ checksum "./composer.lock" }}-2'
+                    paths:
+                        - '~/.cache/composer/'
+            -
+                run:
+                    name: 'Composer install – set PATH'
+                    command: |-
+                        echo "export PATH=\"${PWD}/$(composer config bin-dir):\${PATH}\"" >> "${BASH_ENV}"
+            -
+                run:
+                    name: 'Composer install – set phar.ini'
+                    command: |-
+                        scanDir="$(php -i | grep --color=never --only-matching --perl-regexp '(?<=^Scan this dir for additional \.ini files => ).+')"
+                        echo 'phar.readonly=Off' | sudo tee "${scanDir}/docker-php-ext-phar.ini"
+
+    lint:
+        description: 'Lint'
+        steps:
+            -
+                run:
+                    name: 'Lint – Debug'
+                    command: |
+                        php -i
+                        echo "Docker container memory_limit = $(cat /sys/fs/cgroup/memory.max)"
+            -
+                run:
+                    name: 'Lint – all'
+                    command: |
+                        "$(composer config bin-dir)/robo" -vv lint
+    test:
+        description: 'Run tests'
+        steps:
+            -
+                attach_workspace:
+                    name: 'Run tests – restore ./artifacts/'
+                    at: './artifacts'
+            -
+                run:
+                    name: 'Codeception - unit'
+                    command: |
+                        "$(composer config bin-dir)/robo" test unit
+            -
+                codecov/upload:
+                    flags: 'unit'
+                    file: './reports/machine/coverage.xml'
+            -
+                store_test_results:
+                    name: 'Store test results for CircleCI UI'
+                    path: './reports/machine/junit.xml'
+            -
+                store_artifacts:
+                    name: 'Store test results as artifacts'
+                    path: './reports/machine/junit.xml'
+            -
+                run:
+                    name: 'Delete reports'
+                    command: |
+                        rm --recursive --force ./reports/machine/
+            -
+                run:
+                    name: 'Codeception - e2e'
+                    command: |
+                        "$(composer config bin-dir)/robo" test e2e
+            -
+                store_test_results:
+                    name: 'Store test results for CircleCI UI'
+                    path: './reports/machine/junit.xml'
+            -
+                store_artifacts:
+                    name: 'Store test results as artifacts'
+                    path: './reports/machine/junit.xml'
+
+    install_composer:
+        description: 'Install Composer executable'
+        parameters:
+            version:
+                type: 'string'
+                default: '2.9.3'
+            install_dir:
+                type: 'string'
+                default: '${HOME}/bin'
+            filename:
+                type: 'string'
+                default: 'composer'
+        steps:
+            -
+                run:
+                    name: 'Install Composer executable'
+                    command: |-
+                        mkdir -p "<<parameters.install_dir>>"
+
+                        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+                        expectedChecksum="$(php -r 'copy("https://composer.github.io/installer.sig", "php://stdout");')"
+                        actualChecksum="$(php -r "echo hash_file('sha384', 'composer-setup.php');")"
+                        if [[ "${expectedChecksum}" != "${actualChecksum}" ]] ; then
+                            >&2 echo 'ERROR: Invalid Composer installer checksum'
+                            rm composer-setup.php
+
+                            exit 1
+                        fi
+
+                        php composer-setup.php \
+                            --version='<<parameters.version>>' \
+                            --install-dir="<<parameters.install_dir>>" \
+                            --filename='<<parameters.filename>>'
+
+                        exitCode=$?
+                        rm composer-setup.php
+
+                        exit $exitCode
+
+    release_build:
+        description: 'Release build'
+        steps:
+            -
+                run:
+                    name: 'Release build – phar'
+                    command: |
+                        tag="${CIRCLE_TAG}"
+                        if [[ "${tag}" = '' ]] ; then
+                            tag="${CIRCLE_BRANCH}-dev+$(git log -1 --pretty='format:%ct-%h')"
+                        fi
+
+                        "$(composer config bin-dir)/robo" -v release:build --tag="${tag}"
+                        "./artifacts/${APP_NAME}.phar" --version
+            -
+                persist_to_workspace:
+                    name: 'Release build – Store the release artifacts'
+                    root: './artifacts'
+                    paths:
+                        - '*.phar'
+
+    release_publish:
+        description: 'Publish release'
+        steps:
+            -
+                run:
+                    name: 'Publish release – install gh'
+                    command: |-
+                        curl \
+                            -fsSL \
+                            https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+                        | \
+                            sudo gpg \
+                                --dearmor \
+                                -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+
+                        echo \
+                            "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+                        | \
+                            sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+                        sudo apt update
+                        sudo apt install gh
+            -
+                attach_workspace:
+                    name: 'Publish release – restore ./artifacts/'
+                    at: './artifacts'
+            -
+                run:
+                    name: 'Publish release – create and upload'
+                    command: |
+                        repo="${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+                        tag="$(./artifacts/junit-merger.phar --version | sed --regexp-extended --expression 's/^.+? //g')"
+                        title="${tag}"
+                        notes="${tag}"
+
+                        gh release create \
+                            --repo "${repo}" \
+                            --title "${title}" \
+                            --notes "${notes}" \
+                            "${tag}"
+
+                        gh release upload \
+                            --repo "${repo}" \
+                            "${tag}" \
+                            "./artifacts/${APP_NAME}.phar"
+
+
+jobs:
+    build:
+        executor: 'php_min'
+        steps:
+            - 'php_extension_install'
+            - 'install_composer'
+            - 'checkout'
+            - 'composer_install'
+            - 'release_build'
+    lint:
+        executor: 'php_min'
+        steps:
+            - 'php_extension_install'
+            - 'install_composer'
+            - 'checkout'
+            - 'composer_install'
+            - 'lint'
+    test:
+        parameters:
+            executor:
+                type: 'string'
+        executor: '<<parameters.executor>>'
+        steps:
+            - 'php_extension_install'
+            - 'install_composer'
+            - 'checkout'
+            - 'composer_install'
+            - 'test'
+    release_publish:
+        executor: 'php_min'
+        steps:
+            - 'release_publish'
+
+workflows:
+    lint_and_test:
+        jobs:
+            -
+                build:
+                    filters: &wf_lint_and_test_job_filter
+                        branches:
+                            only: '/.+/'
+                        tags:
+                            only: &regexp_semver '/^\d+\.\d+\.\d+(\-[^+]+)?(\+.+)?$/'
+            -
+                lint:
+                    filters: *wf_lint_and_test_job_filter
+                    requires:
+                        - 'build'
+            -
+                test:
+                    name: 'test_<<matrix.executor>>'
+                    filters: *wf_lint_and_test_job_filter
+                    requires:
+                        - 'build'
+                    matrix:
+                        parameters:
+                            executor:
+                                - 'php_min'
+                                - 'php_plus1'
+            -
+                release_publish:
+                    filters:
+                        branches:
+                            ignore: '/.*/'
+                        tags:
+                            only: *regexp_semver
+                    requires:
+                        - 'lint'
+                        - 'test_php_min'
+                        - 'test_php_plus1'

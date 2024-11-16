@@ -1,0 +1,8 @@
+tidy:
+    enabled: true
+    options:
+        input-xml: true
+        output-xml: true
+        indent: true
+        indent-spaces: 4
+        indent-attributes: true

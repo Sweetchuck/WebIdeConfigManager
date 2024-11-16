@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container
+    xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/symfony/dependency-injection/7.1/Loader/schema/dic/services/services-1.0.xsd"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services https://raw.githubusercontent.com/symfony/dependency-injection/7.1/Loader/schema/dic/services/services-1.0.xsd"
+>
+    <services>
+        <service
+            shared="false"
+            id="symfony.finder"
+            class="\Symfony\Component\Finder\Finder" />
+        <service
+            shared="true"
+            id="symfony.filesystem"
+            class="\Symfony\Component\Filesystem\Filesystem" />
+        <service
+            shared="true"
+            id="app.config.validator"
+            class="\Sweetchuck\WebIdeConfigManager\Util\ConfigValidator" />
+        <service
+            shared="true"
+            id="app.helper"
+            class="\Sweetchuck\WebIdeConfigManager\Util\Helper" />
+        <service
+            shared="true"
+            id="app.template.handler"
+            class="\Sweetchuck\WebIdeConfigManager\Template\Handler" />
+        <service
+            shared="true"
+            id="app.configNormalizer"
+            class="\Sweetchuck\WebIdeConfigManager\Util\ConfigNormalizer" />
+        <service
+            shared="true"
+            id="app.product.handler"
+            class="\Sweetchuck\WebIdeConfigManager\Product\Handler" />
+        <service
+            shared="true"
+            id="app.product.status.tableReporter"
+            class="\Sweetchuck\WebIdeConfigManager\Product\StatusReporter\TableReporter" />
+        <service
+            shared="true"
+            id="app.product.status.diffReporter"
+            class="\Sweetchuck\WebIdeConfigManager\Product\StatusReporter\DiffReporter" />
+        <service
+            shared="false"
+            id="app.repository.comparer"
+            class="\Sweetchuck\Utils\Comparer\ComparerInterface" />
+    </services>
+</container>

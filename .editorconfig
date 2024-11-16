@@ -1,0 +1,15 @@
+root = true
+
+[*]
+end_of_line = LF
+indent_style = space
+indent_size = 4
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[{.phpstan/,phpstan}*.neon]
+indent_style = tab
+
+[*.{sh,bash,dash,zsh}]
+indent_style = tab

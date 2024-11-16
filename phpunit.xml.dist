@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
+    beStrictAboutOutputDuringTests="true"
+    beStrictAboutChangesToGlobalState="true"
+    displayDetailsOnTestsThatTriggerWarnings="true"
+    colors="true"
+    cacheDirectory="./.cache/phpunit/">
+
+    <php>
+        <ini name="memory_limit" value="-1" />
+        <ini name="error_reporting" value="32767" />
+
+        <!--<env name="JBCM_COMMAND" value="['php', '-d', 'extension=tidy', 'artifacts/jbcm.phar', '&#45;&#45;no-ansi']" />-->
+    </php>
+
+    <source>
+        <include>
+            <directory>./src/</directory>
+        </include>
+    </source>
+
+    <coverage>
+        <report>
+            <clover outputFile="./reports/machine/coverage.xml" />
+            <php outputFile="./reports/machine/coverage.php" />
+            <html outputDirectory="./reports/human/coverage/html" />
+            <text outputFile="php://stdout" />
+        </report>
+    </coverage>
+
+    <testsuites>
+        <testsuite name="unit">
+            <directory>./tests/src/Unit</directory>
+        </testsuite>
+        <testsuite name="e2e">
+            <directory>./tests/src/E2E</directory>
+        </testsuite>
+    </testsuites>
+
+    <logging>
+        <testdoxHtml outputFile="./reports/human/testdox.html" />
+        <junit outputFile="./reports/machine/junit.xml" />
+    </logging>
+</phpunit>

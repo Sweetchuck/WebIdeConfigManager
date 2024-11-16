@@ -1,0 +1,6 @@
+includes:
+	- ./.phpstan/parameters.general.neon
+	- ./.phpstan/parameters.paths.neon
+	- ./.phpstan/parameters.typeAliases.prod.neon
+	- ./.phpstan/parameters.typeAliases.dev.neon
+	- ./.phpstan/parameters.ignoreErrors.neon

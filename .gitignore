@@ -1,0 +1,39 @@
+### Common.
+/.cache/
+/reports/
+/artifacts/
+
+
+### Composer.
+/vendor/
+/sweetchuck-sweetchuck.WebIdeConfigManager-*.tar
+/sweetchuck-sweetchuck.WebIdeConfigManager-*.tar.bz2
+/sweetchuck-sweetchuck.WebIdeConfigManager-*.tar.gz
+/sweetchuck-sweetchuck.WebIdeConfigManager-*.tgz
+/sweetchuck-sweetchuck.WebIdeConfigManager-*.zip
+
+
+### Composer Suite.
+/.composer-suite/
+/composer.*.json
+/composer.*.lock
+
+
+### PHPUnit.
+/phpunit.xml
+
+
+### PHP Code Sniffer.
+/phpcs.xml
+
+
+### PHPStan.
+/phpstan.neon
+
+
+### Robo.
+/robo.yml
+
+
+### sweetchuck/git-hooks.
+/.git-hooks-local

@@ -1,0 +1,32 @@
+<templateSet group="Dummy">
+    <template name="template_01"
+        description="desc_01"
+        toReformat="true"
+        toShortenFQNames="true">
+        <context>
+            <option name="PHP Class Member"
+                value="true" />
+        </context>
+        <value>
+            <![CDATA[
+line 01 a
+
+]]>
+        </value>
+    </template>
+    <template name="template_02"
+        description="desc_02"
+        toReformat="true"
+        toShortenFQNames="true">
+        <context>
+            <option name="PHP Class Member"
+                value="true" />
+        </context>
+        <value>
+            <![CDATA[
+line 01 official
+
+]]>
+        </value>
+    </template>
+</templateSet>

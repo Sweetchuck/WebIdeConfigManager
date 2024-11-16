@@ -1,0 +1,8 @@
+<templateSet group="Dummy">
+    <template name="dummy_trigger_01" value="line 01&#10;line 02&#10;line 03$END$&#10;" description="my desc" toReformat="true" toShortenFQNames="true">
+        <context>
+            <option name="PHP Class Member" value="true"/>
+            <option name="PHP Trait Member" value="true"/>
+        </context>
+    </template>
+</templateSet>

@@ -1,0 +1,111 @@
+parameters:
+	typeAliases:
+		jbcm-tidy: '''
+			array{
+				enabled?: bool,
+				options?: array<string, mixed>,
+			}
+		'''
+
+		jbcm-repository: '''
+			array{
+				key: string,
+				weight: integer,
+				enabled: bool,
+				path: string,
+			}
+		'''
+
+		jbcm-template-changed-pair: '''
+			array{
+				local: string,
+				official: string,
+			}
+		'''
+
+		jbcm-template-changed-pairs: '''
+			array<string, jbcm-template-changed-pair>
+		'''
+
+		jbcm-product-status-template-file: '''
+			array{
+				officialFile: null|\Symfony\Component\Finder\SplFileInfo,
+				status: \Sweetchuck\WebIdeConfigManager\ConfigStatus,
+				repositories: array<
+					string,
+					array{
+						localFile: \Symfony\Component\Finder\SplFileInfo,
+						changedPairs: jbcm-template-changed-pairs,
+					}
+				>,
+			}
+		'''
+
+		jbcm-product-status-fileTemplate-file: '''
+			array{
+				officialFile: null|\Symfony\Component\Finder\SplFileInfo,
+				status: \Sweetchuck\WebIdeConfigManager\ConfigStatus,
+				repositories: array<
+					string,
+					array{
+						localFile: \Symfony\Component\Finder\SplFileInfo,
+					}
+				>,
+			}
+		'''
+
+		jbcm-product-status-color-file: '''
+			array{
+				officialFile: null|\Symfony\Component\Finder\SplFileInfo,
+				status: \Sweetchuck\WebIdeConfigManager\ConfigStatus,
+				repositories: array<
+					string,
+					array{
+						localFile: \Symfony\Component\Finder\SplFileInfo,
+					}
+				>,
+			}
+		'''
+
+		jbcm-product-status: '''
+			array{
+				templates: array{
+					files: array<string, jbcm-product-status-template-file>,
+					filesByStatus: array{
+						1: array<string>,
+						2: array<string>,
+						3: array<string>,
+						4: array<string>,
+					},
+					filesFromMultipleRepositories: array<string>,
+				},
+				fileTemplates: array{
+					files: array<string, jbcm-product-status-fileTemplate-file>,
+					filesByStatus: array{
+						1: array<string>,
+						2: array<string>,
+						3: array<string>,
+						4: array<string>,
+					},
+					filesFromMultipleRepositories: array<string>,
+				},
+				colors: array{
+					files: array<string, jbcm-product-status-color-file>,
+					filesByStatus: array{
+						1: array<string>,
+						2: array<string>,
+						3: array<string>,
+						4: array<string>,
+					},
+					filesFromMultipleRepositories: array<string>,
+				},
+			}
+		'''
+
+		jbcm-product: '''
+			array{
+				key: string,
+				dir: string,
+				repositories: array<string, jbcm-repository>,
+			}
+		'''

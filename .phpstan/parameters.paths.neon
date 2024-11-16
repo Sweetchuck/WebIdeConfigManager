@@ -1,0 +1,8 @@
+parameters:
+#    scanDirectories:
+#        - ../vendor/
+	paths:
+		- ../src/
+		- ../tests/
+		- ../RoboFile.php
+	excludePaths: []

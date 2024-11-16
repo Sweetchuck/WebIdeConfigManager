@@ -1,0 +1,18 @@
+{
+    "_hash": "3d93610466762b67e89e4b570c750fb9d5d303fd50de976f0a5ba8bd31d70107",
+    "patches": {
+        "consolidation/robo": [
+            {
+                "package": "consolidation/robo",
+                "description": "Deprecation warning from Symfony Console",
+                "url": "https://patch-diff.githubusercontent.com/raw/consolidation/robo/pull/1184.patch",
+                "sha256": "e8244b97b34622447c0e49bc1bf2153c16b98a8f6847670e8f2c39760457a60c",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://github.com/consolidation/robo/issues/1183",
+                    "provenance": "root"
+                }
+            }
+        ]
+    }
+}

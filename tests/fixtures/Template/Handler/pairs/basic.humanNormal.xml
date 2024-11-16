@@ -1,0 +1,14 @@
+<templateSet group="Dummy">
+  <template name="dummy_trigger_01" description="my desc" toReformat="true" toShortenFQNames="true">
+    <context>
+      <option name="PHP Class Member" value="true"/>
+      <option name="PHP Trait Member" value="true"/>
+    </context>
+    <value><![CDATA[
+line 01
+line 02
+line 03$END$
+
+]]></value>
+  </template>
+</templateSet>

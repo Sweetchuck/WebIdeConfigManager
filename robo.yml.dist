@@ -1,0 +1,5 @@
+php:
+    executables:
+        php_min:
+            command:
+                - 'php'

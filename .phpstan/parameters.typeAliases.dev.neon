@@ -1,0 +1,16 @@
+parameters:
+	typeAliases:
+		dev-php-executable: '''
+			array{
+				enabled: bool,
+				command: array<string>,
+				envVars?: array<string, ?string>,
+			}
+		'''
+		dev-process-result: '''
+			array{
+				exitCode: int,
+				stdOutput: string,
+				stdError: string,
+			}
+		'''

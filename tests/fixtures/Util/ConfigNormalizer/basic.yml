@@ -1,0 +1,38 @@
+expected:
+    tidy:
+        enabled: true
+        options:
+            foo: 'bar'
+    products:
+        PhpStorm:
+            repositories:
+                myRepo01:
+                    path: 'foo'
+                    key: 'myRepo01'
+                    enabled: true
+                    tidyStrategy: 'global'
+            key: 'PhpStorm'
+            dir: 'vfs://root/home/test/.config/JetBrains/PhpStorm4567.89'
+    env:
+        HOME: 'vfs://root/home/test'
+base:
+    tidy:
+        enabled: true
+        options:
+            foo: 'bar'
+    products:
+        PhpStorm:
+            repositories:
+                myRepo01:
+                    path: 'foo'
+    env:
+        HOME: 'vfs://root/home/test'
+vfsStructure:
+    home:
+        test:
+            .config:
+                JetBrains:
+                    PhpStorm1234.56:
+                        idea.properties: 'small'
+                    PhpStorm4567.89:
+                        idea.properties: 'high'

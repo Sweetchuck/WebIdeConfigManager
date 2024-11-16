@@ -1,0 +1,83 @@
+$id: 'https://github.com/Sweetchuck/WebIdeConfigManager/2/config.yml'
+$schema: 'http://json-schema.org/draft-04/schema#'
+title: 'WebIdeConfigManager.yml'
+description: 'Schema definition for WebIdeConfigManager configuration YAML files.'
+
+definitions:
+    stash:
+        type: 'object'
+        description: |
+            This isn't used by the application.
+            This is a place where configuration fragments can be stored,
+            and re-used with YAML language features `&` and `*`,
+            or with the config parser `${stash.foo.bar}`
+        additionalProperties: true
+    tidyStrategy:
+        type: 'string'
+        enum:
+            - 'global'
+            - 'merge'
+            - 'override'
+    tidyOptions:
+        type: 'object'
+        additionalProperties:
+            anyOf:
+                -
+                    type: 'string'
+                -
+                    type: 'integer'
+                -
+                    type: 'number'
+                -
+                    type: 'boolean'
+    tidy:
+        type: 'object'
+        properties:
+            enabled:
+                type: 'boolean'
+            options:
+                '$ref': '#/definitions/tidyOptions'
+    repository:
+        type: 'object'
+        properties:
+            key:
+                type: 'string'
+            path:
+                type: 'string'
+            tidyStrategy:
+                '$ref': '#/definitions/tidyStrategy'
+            tidy:
+                '$ref': '#/definitions/tidy'
+    product:
+        type: 'object'
+        properties:
+            key:
+                type: 'string'
+            dir:
+                type: 'string'
+            repositories:
+                type: 'object'
+                additionalProperties:
+                    '$ref': '#/definitions/repository'
+
+type: 'object'
+additionalProperties: false
+required:
+    - 'version'
+properties:
+    version:
+        type: 'string'
+        description: 'Configuration schema version'
+    stash:
+        '$ref': '#/definitions/stash'
+    env:
+        type: 'object'
+        additionalProperties:
+            type: 'string'
+    tidy:
+        '$ref': '#/definitions/tidy'
+    products:
+        type: 'object'
+        properties:
+            PhpStorm:
+                '$ref': '#/definitions/product'
