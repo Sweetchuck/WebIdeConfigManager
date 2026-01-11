@@ -47,7 +47,7 @@
         "consolidation/config": "^3.0",
         "consolidation/robo": "^5.0",
         "cweagans/composer-patches": "^2.0",
-        "sebastian/diff": "^6.0",
+        "sebastian/diff": "^7.0",
         "sweetchuck/utils": "2.x-dev"
     },
     "require-dev": {
@@ -55,16 +55,16 @@
         "nette/neon": "^3.4",
         "nuvoleweb/robo-config": "^3.0",
         "phpstan/phpstan": "^2.0",
-        "phpunit/phpunit": "^11.4",
+        "phpunit/phpunit": "^12.0",
         "psalm/phar": "^5.26",
-        "squizlabs/php_codesniffer": "^3.6",
+        "squizlabs/php_codesniffer": "^4.0",
         "sweetchuck/git-hooks": "^3.0",
         "sweetchuck/robo-composer": "4.x-dev",
         "sweetchuck/robo-git": "4.x-dev",
         "sweetchuck/robo-phpcs": "4.x-dev",
         "sweetchuck/robo-phpstan": "3.x-dev",
         "symfony/error-handler": "^5.3",
-        "symfony/yaml": "^7.1"
+        "symfony/yaml": "^7.1 || ^8.0"
     },
     "suggest": {
         "ext-tidy": "If Tidy is available then it is used for more advanced XML formatting."

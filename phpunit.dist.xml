@@ -4,7 +4,7 @@
     xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
     beStrictAboutOutputDuringTests="true"
     beStrictAboutChangesToGlobalState="true"
-    displayDetailsOnTestsThatTriggerWarnings="true"
+    displayDetailsOnAllIssues="true"
     colors="true"
     cacheDirectory="./.cache/phpunit/">
 

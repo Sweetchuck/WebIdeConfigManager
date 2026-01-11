@@ -362,7 +362,7 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
         $suiteNames = [];
         $filePath = $this->fs->exists('phpunit.xml')
             ? 'phpunit.xml'
-            : 'phpunit.xml.dist';
+            : 'phpunit.dist.xml';
         $xml = new \DOMDocument();
         $xml->load($filePath);
         $xpath = new \DOMXPath($xml);
@@ -830,7 +830,7 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
                         ->notName('phpstan.dist.neon')
                         ->notName('phpstan.neon.dist')
                         ->notName('phpunit.xml')
-                        ->notName('phpunit.xml.dist')
+                        ->notName('phpunit.dist.xml')
                         ->notName('robo.yml')
                         ->notName('robo.yml.dist')
                         ->notName('RoboFile.php')
@@ -864,7 +864,7 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
                         ->notName('phpcs.xml')
                         ->notName('phpcs.xml.dist')
                         ->notName('phpunit.xml')
-                        ->notName('phpunit.xml.dist')
+                        ->notName('phpunit.dist.xml')
                         ->notName('robo.yml')
                         ->notName('robo.yml.dist')
                         ->notName('RoboFile.php')

@@ -40,7 +40,10 @@ class TestBase extends TestCase
             XML;
 
         $file = $this->createMock(SplFileInfo::class);
-        $file->method('getContents')->willReturn($content);
+        $file
+            ->expects(self::atLeast(0))
+            ->method('getContents')
+            ->willReturn($content);
 
         return $file;
     }

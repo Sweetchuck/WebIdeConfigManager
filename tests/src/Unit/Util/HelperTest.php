@@ -137,7 +137,7 @@ class HelperTest extends TestBase
             ],
         );
         $helper
-            ->expects(static::any())
+            ->expects(static::atLeast(1))
             ->method('jetBrainsDir')
             ->willReturn(null, $jetBrainsFile, $jetBrainsDir, $jetBrainsDir);
 
