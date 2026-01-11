@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-    codecov: 'codecov/codecov@4.0.1'
+    codecov: 'codecov/codecov@5'
 
 .env_common: &env_common
     SHELL: '/bin/bash'
@@ -285,8 +285,9 @@ commands:
                         "$(composer config bin-dir)/robo" test unit
             -
                 codecov/upload:
+                    token: 'CODECOV_TOKEN'
                     flags: 'unit'
-                    file: './reports/machine/coverage.xml'
+                    files: './reports/machine/coverage.xml'
             -
                 store_test_results:
                     name: 'Store test results for CircleCI UI'

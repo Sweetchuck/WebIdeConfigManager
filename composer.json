@@ -58,7 +58,7 @@
         "phpunit/phpunit": "^11.4",
         "psalm/phar": "^5.26",
         "squizlabs/php_codesniffer": "^3.6",
-        "sweetchuck/git-hooks": "2.x-dev",
+        "sweetchuck/git-hooks": "^3.0",
         "sweetchuck/robo-composer": "4.x-dev",
         "sweetchuck/robo-git": "4.x-dev",
         "sweetchuck/robo-phpcs": "4.x-dev",
