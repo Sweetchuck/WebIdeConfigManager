@@ -12,6 +12,8 @@
     <rule ref="PSR2" />
     <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
         <exclude-pattern>RoboFile.php</exclude-pattern>
+    </rule>
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
         <exclude-pattern>bin/jbcm</exclude-pattern>
     </rule>
 
