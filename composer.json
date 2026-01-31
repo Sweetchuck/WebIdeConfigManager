@@ -87,8 +87,8 @@
             "consolidation/robo": [
                 {
                     "description": "Deprecation warning from Symfony Console",
-                    "url": "https://patch-diff.githubusercontent.com/raw/consolidation/robo/pull/1184.patch",
-                    "sha256": "e8244b97b34622447c0e49bc1bf2153c16b98a8f6847670e8f2c39760457a60c",
+                    "url": "https://patch-diff.githubusercontent.com/raw/consolidation/robo/pull/1185.patch",
+                    "sha256": "9255958137137c466db44f7c9ad9c7cef97f43334a98ee3c7e000a3afd51f5c0",
                     "extra": {
                         "issue-tracker-url": "https://github.com/consolidation/robo/issues/1183"
                     }
