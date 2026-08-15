@@ -214,9 +214,9 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
 
     protected function getTaskPhpstanAnalyze(): TaskInterface
     {
-        // @phpstan-ignore-next-line
         $taskGenerateProd = $this
             ->taskPhpstanGeneratePhp()
+            // @phpstan-ignore-next-line
             ->setSrcFiles(
                 (new Finder())
                     ->in('./.phpstan')
@@ -226,9 +226,9 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
             ->setDstFilePath('./src/Phpstan.php')
             ->setNamespace('Sweetchuck\WebIdeConfigManager');
 
-        // @phpstan-ignore-next-line
         $taskGenerateDev = $this
             ->taskPhpstanGeneratePhp()
+            // @phpstan-ignore-next-line
             ->setSrcFiles(
                 (new Finder())
                     ->in('./.phpstan')
@@ -242,9 +242,9 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
         $verboseReporter = $this->getContainer()->get('lintVerboseReporter');
         $verboseReporter->setFilePathStyle('relative');
 
-        // @phpstan-ignore-next-line
         $taskLint = $this
             ->taskPhpstanAnalyze()
+            // @phpstan-ignore-next-line
             ->setNoProgress(true)
             ->setNoInteraction(true)
             ->setErrorFormat('json')
@@ -280,27 +280,29 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
         if ($this->gitHook === 'pre-commit') {
             $cb = $this->collectionBuilder();
             $cb->addTask(
-                // @phpstan-ignore-next-line
                 $this
                     ->taskGitListStagedFiles()
+                    // @phpstan-ignore-next-line
                     ->setPaths(['./.circleci/config.yml' => true])
                     ->setDiffFilter(['d' => false])
                     ->setAssetNamePrefix('staged.')
             );
 
             $cb->addTask(
-                // @phpstan-ignore-next-line
                 $this
                     ->taskGitReadStagedFiles()
+                    // @phpstan-ignore-next-line
                     ->setCommandOnly(true)
                     ->setWorkingDirectory('.')
+                    // @phpstan-ignore-next-line
                     ->deferTaskConfiguration('setPaths', 'staged.fileNames')
             );
 
             $taskForEach = $this->taskForEach();
-            // @phpstan-ignore-next-line
             $taskForEach
+                // @phpstan-ignore-next-line
                 ->iterationMessage('CircleCI config validate: {key}')
+                // @phpstan-ignore-next-line
                 ->deferTaskConfiguration('setIterable', 'files')
                 ->withBuilder(function (
                     CollectionBuilder $builder,
@@ -594,21 +596,22 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
         if ($this->gitHook === 'pre-commit') {
             return $this
                 ->collectionBuilder()
-                // @phpstan-ignore-next-line
                 ->addTask($this
                     ->taskPhpcsParseXml()
+                    // @phpstan-ignore-next-line
                     ->setAssetNamePrefix('phpcsXml.'))
-                // @phpstan-ignore-next-line
                 ->addTask($this
                     ->taskGitListStagedFiles()
+                    // @phpstan-ignore-next-line
                     ->setPaths(['*.php' => true])
                     ->setDiffFilter(['d' => false])
                     ->setAssetNamePrefix('staged.'))
-                // @phpstan-ignore-next-line
                 ->addTask($this
                     ->taskGitReadStagedFiles()
+                    // @phpstan-ignore-next-line
                     ->setCommandOnly(true)
                     ->setWorkingDirectory('.')
+                    // @phpstan-ignore-next-line
                     ->deferTaskConfiguration('setPaths', 'staged.fileNames'))
                 ->addTask($this
                     ->taskPhpcsLintInput($options)
@@ -738,27 +741,29 @@ class RoboFile extends Tasks implements LoggerAwareInterface, ConfigAwareInterfa
 
     protected function getTaskReleaseBuildPrepareWorkingDirectory(CollectionBuilder $cb): TaskInterface
     {
-        // @phpstan-ignore-next-line
         return $this
             ->taskTmpDir(basename(__DIR__), (string) realpath('..'))
+            // @phpstan-ignore-next-line
             ->cwd();
     }
 
     protected function getTaskReleaseBuildCopyProjectCollect(CollectionBuilder $cb): TaskInterface
     {
-        // @phpstan-ignore-next-line
         return $this
             ->taskGitListFiles()
+            // @phpstan-ignore-next-line
             ->setAssetNamePrefix('project.')
+            // @phpstan-ignore-next-line
             ->deferTaskConfiguration('setWorkingDirectory', 'srcDir');
     }
 
     protected function getTaskReleaseBuildPharCopyProjectDoIt(CollectionBuilder $cb): TaskInterface
     {
         $taskForeach = $this->taskForEach();
-        // @phpstan-ignore-next-line
         $taskForeach
+            // @phpstan-ignore-next-line
             ->iterationMessage('Copy source files into a temporary directory: {key}')
+            // @phpstan-ignore-next-line
             ->deferTaskConfiguration('setIterable', 'project.files')
             ->withBuilder(function (CollectionBuilder $builder, string $fileName) use ($cb): int {
                 $srcDir = $cb->getState()['srcDir'];

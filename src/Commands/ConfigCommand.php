@@ -274,16 +274,16 @@ class ConfigCommand extends CommandBase
                 $config['products'][$productName]['repositories'][$repository['key']]['tidy'] ?? [],
             );
 
-            // @phpstan-ignore-next-line
             $taskList["jbcm.pull.$productName.templates.{$repository['key']}"] = $this
                 ->taskJbcmTemplatesPull()
+                // @phpstan-ignore-next-line
                 ->setProductDir($productDir)
                 ->setRepository($repository)
                 ->setTidy($tidy);
 
-            // @phpstan-ignore-next-line
             $taskList["jbcm.pull.$productName.fileTemplates.{$repository['key']}"] = $this
                 ->taskJbcmFileTemplatesPull()
+                // @phpstan-ignore-next-line
                 ->setProductDir($productDir)
                 ->setRepository($repository);
         }
@@ -339,16 +339,16 @@ class ConfigCommand extends CommandBase
                 $config['products'][$productName]['repositories'][$repository['key']]['tidy'] ?? [],
             );
 
-            // @phpstan-ignore-next-line
             $taskList["config.push.{$repository['key']}.templates.$productName"] = $this
                 ->taskJbcmTemplatesPush()
+                // @phpstan-ignore-next-line
                 ->setProductDir($productDir)
                 ->setRepository($repository)
                 ->setTidy($tidy);
 
-            // @phpstan-ignore-next-line
             $taskList["config.push.{$repository['key']}.fileTemplates.$productName"] = $this
                 ->taskJbcmFileTemplatesPush()
+                // @phpstan-ignore-next-line
                 ->setProductDir($productDir)
                 ->setRepository($repository);
         }
@@ -517,18 +517,18 @@ class ConfigCommand extends CommandBase
 
         switch ($componentName) {
             case 'colors':
-                // @phpstan-ignore-next-line
                 $taskList["jbcm.$componentName.pull.single"] = $this
                     ->taskJbcmColorsPullSingle()
+                    // @phpstan-ignore-next-line
                     ->setProductDir($product['dir'])
                     ->setRepository($repository)
                     ->setRelativeFilepath($relativeFilepath);
                 break;
 
             case 'fileTemplates':
-                // @phpstan-ignore-next-line
                 $taskList["jbcm.$componentName.pull.single"] = $this
                     ->taskJbcmFileTemplatesPullSingle()
+                    // @phpstan-ignore-next-line
                     ->setProductDir($product['dir'])
                     ->setRepository($repository)
                     ->setRelativeFilepath($relativeFilepath);
@@ -542,9 +542,9 @@ class ConfigCommand extends CommandBase
                     $repository['tidy'] ?? [],
                 );
 
-                // @phpstan-ignore-next-line
                 $taskList["jbcm.$componentName.pull.single"] = $this
                     ->taskJbcmTemplatesPullSingle()
+                    // @phpstan-ignore-next-line
                     ->setProductDir($product['dir'])
                     ->setRepository($repository)
                     ->setRelativeFilepath($relativeFilepath)
